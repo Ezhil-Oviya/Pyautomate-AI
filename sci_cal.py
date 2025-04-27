@@ -18,32 +18,42 @@ def main():
     # Basic mode: Simple calculator
     if mode == "Basic":
         st.subheader("Basic Calculator")
-        num1 = st.number_input("Enter first number", value=0.0)
-        num2 = st.number_input("Enter second number", value=0.0)
-        operation = st.selectbox("Select operation", ("+", "-", "*", "/"))
         
-        if operation == "+":
-            result = num1 + num2
-        elif operation == "-":
-            result = num1 - num2
-        elif operation == "*":
-            result = num1 * num2
-        elif operation == "/":
-            result = num1 / num2 if num2 != 0 else "Cannot divide by zero"
+        # Calculator display area
+        display = st.text_input("Display", "", key="display", disabled=True, label_visibility="collapsed")
         
-        st.write(f"Result: {result}")
+        # Buttons layout
+        cols = st.columns(4)
+        button_labels = [
+            "7", "8", "9", "/",
+            "4", "5", "6", "*",
+            "1", "2", "3", "-",
+            "0", ".", "C", "+",
+        ]
+        
+        # Capture button clicks
+        for i, label in enumerate(button_labels):
+            with cols[i % 4]:
+                if st.button(label):
+                    current_input = st.session_state.display + label if st.session_state.display != "0" else label
+                    st.session_state.display = current_input
 
+        # Action buttons
+        if st.button("=", use_container_width=True):
+            result = calculate(st.session_state.display)
+            st.session_state.display = str(result)
+        
+        if st.button("Clear", use_container_width=True):
+            st.session_state.display = "0"
+    
     # Scientific mode: Advanced functions
     if mode == "Scientific":
         st.subheader("Scientific Calculator")
 
-        expression = st.text_input("Enter expression (e.g., 2+3, sin(30), cos(45), exp(2))")
-        
-        if expression:
-            result = calculate(expression)
-            st.write(f"Result: {result}")
+        # Calculator display area for scientific mode
+        display = st.text_input("Display", "", key="display", disabled=True, label_visibility="collapsed")
 
-        # Trigonometric Functions
+        # Trigonometric functions input
         angle = st.number_input("Enter angle (in degrees)", value=0)
         angle_rad = math.radians(angle)
         
@@ -63,12 +73,23 @@ def main():
         elif trig_function == "atan":
             st.write(f"atan({angle}) = {math.degrees(math.atan(angle_rad))}")
 
-        # Exponential Function
+        # Exponential function
         exp_number = st.number_input("Enter number for exponentiation", value=1.0)
         exp_result = st.number_input("Enter exponent", value=2)
-        if st.button("Calculate Exponential"):
+        
+        if st.button("Calculate Exponential", use_container_width=True):
             st.write(f"exp({exp_number}) = {math.exp(exp_number)}")
             st.write(f"{exp_number}^{exp_result} = {exp_number ** exp_result}")
 
+        # Scientific expression input
+        expression = st.text_input("Enter scientific expression (e.g., sin(30), 2+3, exp(2))")
+        
+        if expression:
+            result = calculate(expression)
+            st.write(f"Result: {result}")
+
 if __name__ == "__main__":
+    # Initialize display to '0' at start
+    if 'display' not in st.session_state:
+        st.session_state.display = "0"
     main()
