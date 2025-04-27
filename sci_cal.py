@@ -15,12 +15,16 @@ def main():
     # Mode selection: Basic or Scientific
     mode = st.radio("Select Mode", ("Basic", "Scientific"))
     
+    # Initialize display in session state if not already set
+    if 'display' not in st.session_state:
+        st.session_state.display = "0"
+    
     # Basic mode: Simple calculator
     if mode == "Basic":
         st.subheader("Basic Calculator")
         
         # Calculator display area
-        display = st.text_input("Display", "", key="display", disabled=True, label_visibility="collapsed")
+        display = st.text_input("Display", st.session_state.display, key="display", disabled=True, label_visibility="collapsed")
         
         # Buttons layout
         cols = st.columns(4)
@@ -35,8 +39,10 @@ def main():
         for i, label in enumerate(button_labels):
             with cols[i % 4]:
                 if st.button(label):
-                    current_input = st.session_state.display + label if st.session_state.display != "0" else label
-                    st.session_state.display = current_input
+                    if st.session_state.display == "0":
+                        st.session_state.display = label
+                    else:
+                        st.session_state.display += label
 
         # Action buttons
         if st.button("=", use_container_width=True):
@@ -51,7 +57,7 @@ def main():
         st.subheader("Scientific Calculator")
 
         # Calculator display area for scientific mode
-        display = st.text_input("Display", "", key="display", disabled=True, label_visibility="collapsed")
+        display = st.text_input("Display", st.session_state.display, key="display", disabled=True, label_visibility="collapsed")
 
         # Trigonometric functions input
         angle = st.number_input("Enter angle (in degrees)", value=0)
@@ -89,7 +95,4 @@ def main():
             st.write(f"Result: {result}")
 
 if __name__ == "__main__":
-    # Initialize display to '0' at start
-    if 'display' not in st.session_state:
-        st.session_state.display = "0"
     main()
